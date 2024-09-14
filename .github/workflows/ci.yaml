@@ -1,0 +1,186 @@
+name: CI pipeline
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+jobs:
+  test-lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '17'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Test-lint
+        run: |
+          echo "Running lint tests..."
+          npm run test-lint > reports/test-lint.log
+        id: test-lint
+        continue-on-error: false
+      
+      - name: Store reports-eslint
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-lint-error-log-${{ github.sha }}
+          path: src/reports/test-lint.log
+  test-unit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src
+    needs: test-lint
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '17'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Test-unit
+        id: test-unit
+        run: |
+          echo "Running unit tests..."
+          npm run test-unit > reports/test-unit.log
+        continue-on-error: false
+
+      - name: Store reports-unit-test
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-unit-error-log-${{ github.sha }}
+          path: src/reports/test-unit.log
+
+  test-integration:
+    needs: test-unit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '17'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.11.0
+        with:
+          mongodb-version: latest
+
+      - name: Integration Test
+        run: |
+          echo "Running integration tests..."
+          npm run test-integration > reports/test-integration.log
+        continue-on-error: false
+  
+      - name: Store reports-integration-test
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-integration-error-log-${{ github.sha }}
+          path: src/reports/test-integration.log
+      
+
+  test-e2e:
+    runs-on: ubuntu-latest
+    needs: test-integration
+    defaults:
+      run:
+        working-directory: src
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '17'
+
+      - name: Install Dependencies
+        run: npm ci
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.11.0
+        with:
+          mongodb-version: latest
+      - name: Install Playwright Browser
+        run: |
+          echo "Installing Playwright browsers..."
+          npm i playwright@next
+          npx playwright install --with-deps
+          npm install playwright@latest @playwright/test@latest
+          npx playwright install
+
+      - name: Start Application
+        run: |
+          echo "Starting application..."
+          npm start & # Start the app in the background
+          
+      - name: E2E test
+        run: |
+          echo "Running end-to-end tests..."
+          npm run test-e2e > reports/test-e2e.log
+        continue-on-error: false
+
+      - name: Store reports-e2e-test
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-e2e-error-log-${{ github.sha }}
+          path: src/reports/test-e2e.log
+  upload-deployable-artifacts:
+    runs-on: ubuntu-latest
+    needs: test-e2e
+    defaults:
+      run:
+        working-directory: src
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '17'
+
+      - name: Install Dependencies
+        run: npm ci
+    
+      - name: Upload Deployable Artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployable-artifact
+          path: |
+            src/
+            !src/node_modules/
+            !src/tests
+            !src/coverage/
+            !src/reports/
+            !src/.eslintrc.yml
+            !src/jest.config.js
+            !src/playwright.config.ts
+

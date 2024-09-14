@@ -1,0 +1,5 @@
+node_modules/
+*Zone.Identifier
+src/coverage/lcov-report/index.html
+src/coverage/lcov-report/note.js.html
+junit.xml

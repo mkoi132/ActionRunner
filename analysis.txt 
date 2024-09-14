@@ -1,0 +1,46 @@
+# The Problem
+
+Alpine Inc is facing several challenges due to their current development and deployment practices:
+
+1. Manual Deployment Process:
+The current deployment process relies heavily on a single developer (Pete), who builds and deploys the application manually from his laptop.
+This creates a single point of failure, as the team struggles when Pete’s absence led to a missed critical release. This dependency risks delays in future releases.
+2. Production Bugs:
+The manual process lacks systematic checks and balances, which has led to the introduction of bugs in production.
+These bugs have increased the volume of support calls and forced the support and development teams to work overtime to manage and fix issues.
+3. Lack of Automation and Testing: The absence of automated testing and build processes means that any issues in the code are not caught early in the development cycle.
+This results in defective code being promoted to production, leading to unstable releases.
+
+# The Solution 
+
+To address these issues, I propose implementing a Continuous Integration (CI) pipeline using GitHub Actions. This is a SaaS tool that integrates seamlessly with GitHub, which the team has currently been using to support development.
+This solution will help automate the testing processes, ensuring that code changes are thoroughly tested on every single push, which helps detect and address any error early, and ease the need of manual testing to minimum.
+
+Key Components of the Solution:
+
+1. CI Pipeline with GitHub Actions:
+   - The pipeline will automatically build run and test the application whenever changes are pushed to any branch or when a pull request is opened. This ensures that any issues are identified early in the development process, reducing the problem of bugs being introduced into production/ release.
+   - GitHub Action supports pre-built actions and container with different kernel, which are useful for testing the code from different environments. Each job could be run in a seperated environment which could possibly avoid the left-over data which could make the code broke.
+   - GitHub Actions allows the creation of workflows as code (written in .yaml file), which can be version-controlled and easily updated.
+
+2. Git Flow Branching Strategy:
+   - By folloing GitHub Flow branching strategy, changes are made in feature branches and merged into the main branch through pull requests (PRs). This will ensure that only thoroughly tested and reviewed code can reach to production/release.
+   - The CI pipeline act as an additional safeguard by automatically running tests on the code, and report back the status of checked workflow, preventing the error code to reach main branch.
+
+#Challenges
+While implementing automated test and building pipeline, there are some issue which the workflow detected that the team has previously skipped (or not yet know of)
+
+1. Lint test: This check for any error or redundant in syntax of the code.
+An Error is detected for the file `note.test.js` where a vriable name `Note` is detected but never used. We commented out this code.
+
+2. Unit test: This check if the written functions are peforming well by giving input and check the output against the expected one.
+An error is detected which causes the unit test run to fail, the written mock test from `model.not.test.js` is giving an invalid input for the field `description`, which expected some string to be inputed. So we put a random mock string for description field in the test file.
+
+3. End-to-end test:
+The original playwright version was not compatible with the latest stable version of ubuntu (`v22.04`), so runing the test failed as it could not find some packages.
+therefore, we updated the playwright to latest version which officially confirmed that it support ubuntu v22.04. 
+The command `npm install playwright@latest @playwright/test@latest` install the latest version of playwright.
+Then we also update browser binary and dependacies `npx playwright install --with-deps`.
+npm also update the package.json file with lastest dependencies. And the test command was able to be run successfully.
+
+
