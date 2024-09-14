@@ -69,7 +69,7 @@ The pipeline is triggered and run automatically on any *push* event to any branc
 - **Fail**: If any job fails (lint, unit, integration, or E2E tests), the pipeline will break with a *fail* status, Plus, a report will be uploaded for further investigation.
 
 ### Example of workflow failure of `unit test` job
-*A workflow run of this pipeline could be accessbible by visiting [Github Action tab](https://github.com/rmit-sdo-2024-s2/s3871704-assignment-1/actions)*
+*A workflow run of this pipeline could be accessbible by visiting [Github Action tab](https://github.com/mkoi132/ActionRunner/actions)*
 
 ![A failed unit test job](img/unit-test-fail-ex.png)
 
@@ -96,7 +96,7 @@ The pipeline is triggered and run automatically on any *push* event to any branc
 4. **Re-run the Pipeline**: Once the issue is fixed, the pipeline will be automatically triggered on push.</br>If the new changes pass the written test file, we will recieve a *pass* status check, and no artifact will be given as the workflow continue to run.
 
 ### Example of workflow success on `main` branch
-Status check of evry workflow run is accessible from *[Github Action tab](https://github.com/rmit-sdo-2024-s2/s3871704-assignment-1/actions).*
+Status check of evry workflow run is accessible from *[Github Action tab](https://github.com/mkoi132/ActionRunner/actions).*
 As specified, any sucessfull workflow triggered on `main` branch will generate a deployable artifact,</br>
 this artifact is combination of the code which passed the workflow test run, with non-essential development part removed.
 
@@ -107,7 +107,7 @@ Generated deployable artifact could be downloaded(and deployed).
 ![deployable-artifact](img/deployable-artifact-main.png)
 
 ### Example of workflow success on any other branches
-Status check of evry workflow run is accessible from *[Github Action tab](https://github.com/rmit-sdo-2024-s2/s3871704-assignment-1/actions).*
+Status check of evry workflow run is accessible from *[Github Action tab](https://github.com/mkoi132/ActionRunner/actions).*
 As specified, any sucessfull workflow triggered on any other branches other than `main` branch should not generate nor upload any artifact.
 
 This shows an explample of workflow running on `hotfix` branch for commit `96c383e`. We notice **NO** artifact generated from the workflow run.
