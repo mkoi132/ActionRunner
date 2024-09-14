@@ -129,10 +129,8 @@ jobs:
       - name: Install Playwright Browser
         run: |
           echo "Installing Playwright browsers..."
-          npm i playwright@next
-          npx playwright install --with-deps
           npm install playwright@latest @playwright/test@latest
-          npx playwright install
+          npx playwright install --with-deps
 
       - name: Start Application
         run: |
